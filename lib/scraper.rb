@@ -18,7 +18,26 @@ class Scraper
   end
 
   def self.scrape_profile_page(profile_url)
-    
+    html = open(profile_url)
+    student_page = Nokogiri::HTML.parse(html)
+    social_link_ary = student_page.css(".social-icon-container a").collect {|el| el.values}.flatten
+    scraped_profile = {}
+    social_link_ary.each do |link|
+      if link.match?(/twitter/)
+        scraped_profile[:twitter] = link
+      elsif link.match?(/linkedin/)
+        scraped_profile[:linkedin] = link
+      elsif link.match?(/github/)
+        scraped_profile[:github] = link
+      else
+        scraped_profile[:blog] = link
+      end
+    end
+    scraped_profile[:bio] = student_page.css(".description-holder p").text
+    # binding.pry
+    scraped_profile[:profile_quote] = student_page.css(".profile-quote").text
+    # binding.pry
+    scraped_profile
   end
 
 end
